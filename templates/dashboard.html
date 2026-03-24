@@ -178,6 +178,15 @@
                 </div>
                 <!-- Time Range Filter -->
                 <div class="flex items-center gap-3">
+                    <div id="custom-range-controls"
+                        class="hidden flex items-center gap-2 bg-white/80 backdrop-blur-sm border border-slate-200 rounded-xl px-3 py-1.5 shadow-sm">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">From</span>
+                        <select id="custom-from" onchange="updateCustomRange()"
+                            class="text-xs font-bold bg-transparent border-0 text-slate-700 outline-none focus:ring-0 p-0 cursor-pointer"></select>
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">To</span>
+                        <select id="custom-to" onchange="updateCustomRange()"
+                            class="text-xs font-bold bg-transparent border-0 text-slate-700 outline-none focus:ring-0 p-0 cursor-pointer"></select>
+                    </div>
                     <div
                         class="flex items-center gap-2 bg-white backdrop-blur-sm border border-slate-200 rounded-xl px-3 py-2 shadow-sm">
                         <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Time
@@ -188,6 +197,7 @@
                             <option value="6">Last 6 Months</option>
                             <option value="12">Last 12 Months</option>
                             <option value="ytd">Current Year</option>
+                            <option value="custom">Custom Range</option>
                         </select>
                     </div>
                 </div>
@@ -787,6 +797,15 @@
                 </div>
                 <!-- Time Range Filter -->
                 <div class="flex items-center gap-3">
+                    <div id="custom-range-controls-overall"
+                        class="hidden flex items-center gap-2 bg-white/80 backdrop-blur-sm border border-slate-200 rounded-xl px-3 py-1.5 shadow-sm">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">From</span>
+                        <select id="custom-from-overall" onchange="updateCustomRange()"
+                            class="text-xs font-bold bg-transparent border-0 text-slate-700 outline-none focus:ring-0 p-0 cursor-pointer"></select>
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">To</span>
+                        <select id="custom-to-overall" onchange="updateCustomRange()"
+                            class="text-xs font-bold bg-transparent border-0 text-slate-700 outline-none focus:ring-0 p-0 cursor-pointer"></select>
+                    </div>
                     <div
                         class="flex items-center gap-2 bg-white backdrop-blur-sm border border-slate-200 rounded-xl px-3 py-2 shadow-sm">
                         <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Time
@@ -797,6 +816,7 @@
                             <option value="6">Last 6 Months</option>
                             <option value="12">Last 12 Months</option>
                             <option value="ytd">Current Year</option>
+                            <option value="custom">Custom Range</option>
                         </select>
                     </div>
                 </div>
@@ -1122,9 +1142,10 @@
 
         <div class="fixed bottom-8 right-8 z-50">
             <button id="injini-ai-btn"
-                class="bg-injiniBlue text-white p-0 rounded-full shadow-2xl hover:scale-105 transition-transform duration-200 border-2 border-injiniGold w-16 h-16 flex items-center justify-center group overflow-hidden">
-                <img src="/static/logo.svg" alt="Injini AI" class="w-12 h-12 object-contain filter brightness-0 invert">
-                <span class="absolute -top-2 -right-2 w-5 h-5 bg-injiniRed rounded-full animate-ping"></span>
+                style="background-color: #0f172a !important;"
+                class="text-white p-0 rounded-full shadow-[0_12px_45px_rgba(0,0,0,0.4)] hover:scale-110 transition-transform duration-200 border-2 border-white/20 w-16 h-16 flex items-center justify-center group overflow-hidden">
+                <img src="/static/logo.svg" alt="Injini AI" class="w-10 h-10 object-contain filter brightness-0 invert">
+                <span class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-white shadow-sm"></span>
             </button>
         </div>
 
@@ -1135,9 +1156,8 @@
             <div style="background: linear-gradient(to right, #001c94, #1e3a8a); color: white;"
                 class="p-4 flex justify-between items-center">
                 <div class="flex items-center gap-2">
-                    <div class="w-8 h-8 rounded-full bg-white flex items-center justify-center">
-                        <img src="/static/logo.svg" class="w-5 h-5"
-                            style="filter: brightness(0) saturate(100%) invert(11%) sepia(95%) saturate(6157%) hue-rotate(234deg) brightness(73%) contrast(131%);">
+                    <div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center border border-white/30">
+                        <img src="/static/logo.svg" class="w-5 h-5 filter brightness-0 invert">
                     </div>
                     <div>
                         <h3 class="font-bold text-sm">Injini AI</h3>
@@ -1196,6 +1216,8 @@
         const chartDefaults = { fontFamily: 'Montserrat, sans-serif', toolbar: { show: false } };
         const renderedCharts = {};
         let currentTimeRange = '{{ current_range | default("all") }}';
+        let customFrom = '{{ custom_from | default("") }}';
+        let customTo = '{{ custom_to | default("") }}';
         let allAvailableMonths = []; // Populated on load
 
         // -- LINEAR TREND HELPER ----------------------------------------------
@@ -2035,6 +2057,15 @@
             }
         });
 
+        // --- Restore Time Range UI State ---
+        document.querySelectorAll('[id^="global-time-range"]').forEach(el => el.value = currentTimeRange);
+        if (currentTimeRange === 'custom') {
+            document.querySelectorAll('[id^="custom-range-controls"]').forEach(el => {
+                el.classList.remove('hidden');
+                el.classList.add('flex');
+            });
+            if (allAvailableMonths.length === 0 && typeof initMonthList === "function") initMonthList();
+        }
     </script>
 </body>
 
