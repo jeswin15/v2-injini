@@ -49,12 +49,12 @@ def _safe_json(data) -> str:
 _cache = {}
 CACHE_TTL = 300  # seconds
 
-def get_dashboard_data(time_range="all", custom_from=None, custom_to=None):
-    cache_key = f"{time_range}_{custom_from}_{custom_to}"
+def get_dashboard_data(time_range="all"):
+    cache_key = f"{time_range}"
     now = time.time()
     if cache_key not in _cache or (now - _cache[cache_key]['ts']) > CACHE_TTL:
         raw_df = fetch_dashboard_data()
-        kpi_data = calculate_kpis(raw_df, time_range, custom_from, custom_to)
+        kpi_data = calculate_kpis(raw_df, time_range)
         _cache[cache_key] = {'data': (raw_df, kpi_data), 'ts': now}
     return _cache[cache_key]['data']
 
@@ -73,6 +73,14 @@ class DotDict(dict):
 # ---------------------------------------------------------------------------
 # Routes
 # ---------------------------------------------------------------------------
+@app.after_request
+def add_header(response):
+    """Disable caching to ensure data updates are reflected immediately."""
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
+
 @app.route('/health')
 def health():
     return 'ok', 200
@@ -81,9 +89,7 @@ def health():
 @app.route('/')
 def dashboard():
     time_range = request.args.get('range', 'all')
-    custom_from = request.args.get('from')
-    custom_to = request.args.get('to')
-    raw_df, kpi_data = get_dashboard_data(time_range, custom_from, custom_to)
+    raw_df, kpi_data = get_dashboard_data(time_range)
 
     kpis_for_template = DotDict(
         Program_Overview=DotDict(kpi_data['Program_Overview']),
@@ -105,9 +111,7 @@ def dashboard():
         red_flags=kpi_data['Red_Flags'],
         cohort_detail=kpi_data['Cohort_Detail'],
         cohort_detail_json=cohort_detail_json,
-        current_range=time_range,
-        custom_from=custom_from,
-        custom_to=custom_to
+        current_range=time_range
     )
 
 

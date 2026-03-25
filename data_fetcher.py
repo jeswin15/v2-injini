@@ -192,6 +192,8 @@ def fetch_dashboard_data() -> pd.DataFrame:
                 total_sub_teachers = _get(lk, [
                     "Total Subscribers - Teachers",
                     "Total subscribers - Teachers",   # strip() normalises trailing space
+                    "Total Educators",
+                    "Total Teachers",
                     "Monthly active users -Teachers",
                     "Monthly Active subscribers - Teachers",
                 ]) or 0
@@ -345,6 +347,7 @@ def fetch_dashboard_data() -> pd.DataFrame:
                     "Grants Value":                 grants_value,
                     "Grant Funder":                 grant_funder,
                     "Income Statement":             income_statement,
+                    "Created Time":                 record.get("createdTime", ""),
                 })
 
             except Exception as row_exc:

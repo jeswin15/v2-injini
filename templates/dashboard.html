@@ -178,15 +178,6 @@
                 </div>
                 <!-- Time Range Filter -->
                 <div class="flex items-center gap-3">
-                    <div id="custom-range-controls"
-                        class="hidden flex items-center gap-2 bg-white/80 backdrop-blur-sm border border-slate-200 rounded-xl px-3 py-1.5 shadow-sm">
-                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">From</span>
-                        <select id="custom-from" onchange="updateCustomRange()"
-                            class="text-xs font-bold bg-transparent border-0 text-slate-700 outline-none focus:ring-0 p-0 cursor-pointer"></select>
-                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">To</span>
-                        <select id="custom-to" onchange="updateCustomRange()"
-                            class="text-xs font-bold bg-transparent border-0 text-slate-700 outline-none focus:ring-0 p-0 cursor-pointer"></select>
-                    </div>
                     <div
                         class="flex items-center gap-2 bg-white backdrop-blur-sm border border-slate-200 rounded-xl px-3 py-2 shadow-sm">
                         <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Time
@@ -197,7 +188,6 @@
                             <option value="6">Last 6 Months</option>
                             <option value="12">Last 12 Months</option>
                             <option value="ytd">Current Year</option>
-                            <option value="custom">Custom Range</option>
                         </select>
                     </div>
                 </div>
@@ -453,7 +443,7 @@
                                         New Female Jobs</th>
                                     <th
                                         class="px-6 py-4 text-right font-bold text-slate-500 uppercase text-xs tracking-wider">
-                                        Youth Jobs</th>
+                                        Net Youth Created</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-50">
@@ -469,9 +459,9 @@
                                         class="px-6 py-4 text-right font-mono font-semibold {% if cd.get('cohort_jobs_pct', 0) >= 0 %}text-injiniGreen{% else %}text-injiniRed{% endif %}">
                                         {{ cd.get('cohort_jobs_pct', 0) }}%</td>
                                     <td class="px-6 py-4 text-right text-injiniBlue">{{
-                                        "{:+,}".format(cd.get('jobs_table', [])|sum(attribute='new_female')) }}</td>
+                                        "{:+,}".format(cd.get('jobs_table', [])|map(attribute='new_female', default=0)|sum) }}</td>
                                     <td class="px-6 py-4 text-right text-slate-800">{{
-                                        "{:,}".format(cd.get('jobs_table', [])|sum(attribute='youth')) }}</td>
+                                        "{:+,}".format(cd.get('jobs_table', [])|map(attribute='new_youth', default=0)|sum) }}</td>
                                 </tr>
                                 {% for j in cd.get('jobs_table', []) %}
                                 <tr class="hover:bg-slate-50/50 transition">
@@ -485,9 +475,9 @@
                                         class="px-6 py-4 text-right font-mono font-semibold {% if j.pct_change >= 0 %}text-injiniGreen{% else %}text-injiniRed{% endif %}">
                                         {{ j.pct_change }}%</td>
                                     <td class="px-6 py-4 text-right font-mono font-semibold text-injiniBlue">{{
-                                        "{:+,}".format(j.new_female) }}</td>
+                                        "{:+,}".format(j.new_female if j.new_female is defined else 0) }}</td>
                                     <td class="px-6 py-4 text-right font-mono font-semibold text-slate-800">{{
-                                        "{:,}".format(j.youth) }}</td>
+                                        "{:+,}".format(j.new_youth if j.new_youth is defined else 0) }}</td>
                                 </tr>
                                 {% endfor %}
                                 {% if not cd.get('jobs_table') %}
@@ -673,13 +663,13 @@
                             <tr class="bg-injiniBlue/5 font-bold">
                                 <td class="px-6 py-4 text-slate-900 italic">Cohort Total</td>
                                 <td class="px-6 py-4 text-right text-injiniBlue">{{ "{:,}".format(cd.get('users_table',
-                                    [])|sum(attribute='tot_learners')) }}</td>
+                                    [])|map(attribute='tot_learners', default=0)|sum) }}</td>
                                 <td class="px-6 py-4 text-right text-green-600">{{ "{:,}".format(cd.get('users_table',
-                                    [])|sum(attribute='tot_educators')) }}</td>
+                                    [])|map(attribute='tot_educators', default=0)|sum) }}</td>
                                 <td class="px-6 py-4 text-right text-slate-800">{{ "{:,}".format(cd.get('users_table',
-                                    [])|sum(attribute='new_learners')) }}</td>
+                                    [])|map(attribute='new_learners', default=0)|sum) }}</td>
                                 <td class="px-6 py-4 text-right text-slate-800">{{ "{:,}".format(cd.get('users_table',
-                                    [])|sum(attribute='new_educators')) }}</td>
+                                    [])|map(attribute='new_educators', default=0)|sum) }}</td>
                                 <td class="px-6 py-4 text-xs italic text-slate-400 opacity-70">Cohort View</td>
                             </tr>
                             {% for u in cd.get('users_table', []) %}
@@ -764,11 +754,11 @@
                                     <tr class="hover:bg-slate-50/50 transition">
                                         <td class="px-6 py-4 font-semibold text-slate-900">{{ d.name }}</td>
                                         <td class="px-6 py-4 text-right font-mono font-semibold text-pink-600">{{
-                                            "{:,}".format(d.female) }}</td>
+                                            "{:,}".format((d.female_stu if d.female_stu is defined else 0) + (d.female_tea if d.female_tea is defined else 0)) }}</td>
                                         <td class="px-6 py-4 text-right font-mono font-semibold text-amber-600">{{
-                                            "{:,}".format(d.rural) }}</td>
+                                            "{:,}".format((d.rural_stu if d.rural_stu is defined else 0) + (d.rural_tea if d.rural_tea is defined else 0)) }}</td>
                                         <td class="px-6 py-4 text-right font-mono font-semibold text-violet-600">{{
-                                            "{:,}".format(d.disability) }}</td>
+                                            "{:,}".format((d.disability_stu if d.disability_stu is defined else 0) + (d.disability_tea if d.disability_tea is defined else 0)) }}</td>
                                     </tr>
                                     {% endfor %}
                                     {% if not cd.get('disaggregation') %}
@@ -797,15 +787,6 @@
                 </div>
                 <!-- Time Range Filter -->
                 <div class="flex items-center gap-3">
-                    <div id="custom-range-controls-overall"
-                        class="hidden flex items-center gap-2 bg-white/80 backdrop-blur-sm border border-slate-200 rounded-xl px-3 py-1.5 shadow-sm">
-                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">From</span>
-                        <select id="custom-from-overall" onchange="updateCustomRange()"
-                            class="text-xs font-bold bg-transparent border-0 text-slate-700 outline-none focus:ring-0 p-0 cursor-pointer"></select>
-                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">To</span>
-                        <select id="custom-to-overall" onchange="updateCustomRange()"
-                            class="text-xs font-bold bg-transparent border-0 text-slate-700 outline-none focus:ring-0 p-0 cursor-pointer"></select>
-                    </div>
                     <div
                         class="flex items-center gap-2 bg-white backdrop-blur-sm border border-slate-200 rounded-xl px-3 py-2 shadow-sm">
                         <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Time
@@ -816,7 +797,6 @@
                             <option value="6">Last 6 Months</option>
                             <option value="12">Last 12 Months</option>
                             <option value="ytd">Current Year</option>
-                            <option value="custom">Custom Range</option>
                         </select>
                     </div>
                 </div>
@@ -974,7 +954,7 @@
                     </div>
                     <div class="bento-card bg-white p-4 text-center">
                         <p class="text-[10px] text-slate-400 uppercase font-bold tracking-widest">Youth Jobs</p>
-                        <p class="text-2xl font-bold text-slate-800 mt-1">{{ "{:,}".format(js['Youth Jobs']) }}</p>
+                        <p class="text-2xl font-bold text-slate-800 mt-1">{{ "{:+,}".format(js['New Youth Jobs']) }}</p>
                     </div>
                     <div class="bento-card bg-white p-4 text-center">
                         <p class="text-[10px] text-slate-400 uppercase font-bold tracking-widest">New Female</p>
@@ -1216,9 +1196,6 @@
         const chartDefaults = { fontFamily: 'Montserrat, sans-serif', toolbar: { show: false } };
         const renderedCharts = {};
         let currentTimeRange = '{{ current_range | default("all") }}';
-        let customFrom = '{{ custom_from | default("") }}';
-        let customTo = '{{ custom_to | default("") }}';
-        let allAvailableMonths = []; // Populated on load
 
         // -- LINEAR TREND HELPER ----------------------------------------------
         function linearTrend(yValues) {
@@ -1359,53 +1336,9 @@
 
         function updateGlobalTimeRange(val) {
             currentTimeRange = val;
-
-            const customControls = document.querySelectorAll('[id^="custom-range-controls"]');
-            if (val === 'custom') {
-                customControls.forEach(el => el.classList.remove('hidden'));
-                customControls.forEach(el => el.classList.add('flex'));
-                if (!allAvailableMonths.length) initMonthList();
-            } else {
-                customControls.forEach(el => el.classList.add('hidden'));
-                window.location.href = "/?range=" + val;
-            }
+            window.location.href = "/?range=" + val;
         }
 
-        function initMonthList() {
-            const monthsSet = new Set();
-            // Collect from cohorts
-            Object.values(cohortData).forEach(d => {
-                if (d.cohort_aggregate?.months) d.cohort_aggregate.months.forEach(m => monthsSet.add(m));
-                if (d.reach?.months) d.reach.months.forEach(m => monthsSet.add(m));
-                if (d.jobs_bar?.months) d.jobs_bar.months.forEach(m => monthsSet.add(m));
-            });
-            allAvailableMonths = Array.from(monthsSet).sort();
-
-            if (allAvailableMonths.length) {
-                customFrom = allAvailableMonths[0];
-                customTo = allAvailableMonths[allAvailableMonths.length - 1];
-                populateMonthDropdowns();
-            }
-        }
-
-        function populateMonthDropdowns() {
-            const fromEls = document.querySelectorAll('[id^="custom-from"]');
-            const toEls = document.querySelectorAll('[id^="custom-to"]');
-
-            const optionsHtml = allAvailableMonths.map(m => `<option value="${m}">${fmtMonth(m)}</option>`).join('');
-
-            fromEls.forEach(el => { el.innerHTML = optionsHtml; el.value = customFrom; });
-            toEls.forEach(el => { el.innerHTML = optionsHtml; el.value = customTo; });
-        }
-
-        function updateCustomRange() {
-            const fromVal = document.getElementById('custom-from')?.value || document.getElementById('custom-from-overall')?.value;
-            const toVal = document.getElementById('custom-to')?.value || document.getElementById('custom-to-overall')?.value;
-
-            if (fromVal && toVal) {
-                window.location.href = "/?range=custom&from=" + fromVal + "&to=" + toVal;
-            }
-        }
 
         function getChartSeriesAndVal(type, cohortKey, filterVal) {
             const d = cohortData[cohortKey];
@@ -1428,11 +1361,6 @@
                     const currentYear = new Date().getFullYear().toString();
                     startIndex = m.findIndex(mo => mo.startsWith(currentYear));
                     if (startIndex === -1) startIndex = m.length; // No data for current year
-                } else if (currentTimeRange === 'custom' && customFrom && customTo) {
-                    startIndex = m.findIndex(mo => mo >= customFrom);
-                    endIndex = m.findLastIndex ? m.findLastIndex(mo => mo <= customTo) + 1 : m.length;
-                    if (startIndex === -1) startIndex = m.length;
-                    if (endIndex === 0 && m.length > 0) endIndex = m.length;
                 }
 
                 if (startIndex !== -1) {
@@ -2059,13 +1987,6 @@
 
         // --- Restore Time Range UI State ---
         document.querySelectorAll('[id^="global-time-range"]').forEach(el => el.value = currentTimeRange);
-        if (currentTimeRange === 'custom') {
-            document.querySelectorAll('[id^="custom-range-controls"]').forEach(el => {
-                el.classList.remove('hidden');
-                el.classList.add('flex');
-            });
-            if (allAvailableMonths.length === 0 && typeof initMonthList === "function") initMonthList();
-        }
     </script>
 </body>
 
