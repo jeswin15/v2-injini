@@ -22,6 +22,7 @@ Thumbs.db
 # App cache
 ai_cache.json
 
-# Temporary files
+# Temporary and data files
 *.log
 *.tmp
+*.xlsx
