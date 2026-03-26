@@ -186,14 +186,14 @@ def _dedup_business_records(
             })
 
     # Build the deduplicated frame:
-    # – numeric columns  → max across duplicates (picks larger/complete report)
+    # – numeric columns  → MEAN across duplicates (to avoid overcounting)
     # – non-numeric cols → first occurrence value
     num_cols_present = [c for c in _NUMERIC_COLS if c in valid.columns]
     non_num_cols     = [c for c in valid.columns
                         if c not in num_cols_present
                         and c not in ("Business Name", "Date")]
 
-    agg_dict = {c: "max" for c in num_cols_present}
+    agg_dict = {c: "mean" for c in num_cols_present}
     agg_dict.update({c: "first" for c in non_num_cols})
 
     deduped = (
@@ -660,12 +660,13 @@ def calculate_kpis(df: pd.DataFrame, time_range: str = "all") -> dict:
             # ── Disaggregation ────────────────────────────────────────────────
             # Indicators say: "Average % across fellows that reported this metric in their most recent submission."
             # We collect these percentages to average them at the cohort level later.
-            biz_female_stu = _safe_float(bs_valid["Female Students"].dropna().iloc[-1]) if not bs_valid["Female Students"].dropna().empty else None
-            biz_female_tea = _safe_float(bs_valid["Female Teachers"].dropna().iloc[-1]) if not bs_valid["Female Teachers"].dropna().empty else None
-            biz_rural_stu  = _safe_float(bs_valid["Rural Students"].dropna().iloc[-1]) if not bs_valid["Rural Students"].dropna().empty else None
-            biz_rural_tea  = _safe_float(bs_valid["Rural Teachers"].dropna().iloc[-1]) if not bs_valid["Rural Teachers"].dropna().empty else None
-            biz_disab_stu  = _safe_float(bs_valid["Disability Students"].dropna().iloc[-1]) if not bs_valid["Disability Students"].dropna().empty else None
-            biz_disab_tea  = _safe_float(bs_valid["Disability Teachers"].dropna().iloc[-1]) if not bs_valid["Disability Teachers"].dropna().empty else None
+            # Fix: use Latest Non-Zero Value (_latest_nv) to skip trailing zeros from stopped reporting.
+            biz_female_stu = _latest_nv("Female Students", None)
+            biz_female_tea = _latest_nv("Female Teachers", None)
+            biz_rural_stu  = _latest_nv("Rural Students", None)
+            biz_rural_tea  = _latest_nv("Rural Teachers", None)
+            biz_disab_stu  = _latest_nv("Disability Students", None)
+            biz_disab_tea  = _latest_nv("Disability Teachers", None)
 
             disagg_table.append({
                 "name":            biz_name,
@@ -851,6 +852,8 @@ def calculate_kpis(df: pd.DataFrame, time_range: str = "all") -> dict:
             "jobs_table":         jobs_table,
             "investments_table":  coh_investments,
             "reach":              reach,
+            "subs_latest_total":  (coh_total_lrn + coh_total_edu),
+            "newsubs_latest_total": (coh_new_lrn + coh_new_edu),
             "users_table":        users_table,
             "disaggregation":     disagg_table,
         }

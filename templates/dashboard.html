@@ -996,8 +996,7 @@
                                     <td class="px-6 py-4 font-semibold text-slate-900">{{ c.Cohort }}</td>
                                     <td class="px-6 py-4 text-right font-mono font-semibold text-slate-800">{{
                                         "{:,}".format(c['Total Jobs']) }}</td>
-                                    <td class="px-6 py-4 text-right font-mono font-semibold text-injiniBlue">{{ c['Jobs
-                                        Pct Change'] }}%</td>
+                                    <td class="px-6 py-4 text-right font-mono font-semibold text-injiniBlue">{{ c['Jobs Pct Change'] }}%</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -1456,7 +1455,7 @@
                         { name: 'Total Educators', data: d.reach.total_educators },
                     ];
                     result.months = d.reach.months;
-                    result.val = ((d.reach.total_learners.at(-1) || 0) + (d.reach.total_educators.at(-1) || 0)).toLocaleString();
+                    result.val = (d.subs_latest_total ?? ((d.reach.total_learners.at(-1) || 0) + (d.reach.total_educators.at(-1) || 0))).toLocaleString();
                 } else if (d.fellows_reach) {
                     const f = d.fellows_reach.find(x => x.name === filterVal);
                     if (f) {
@@ -1476,7 +1475,7 @@
                         { name: 'New Educators (Cum)', data: d.reach.new_educators_cum },
                     ];
                     result.months = d.reach.months;
-                    result.val = ((d.reach.new_learners_cum.at(-1) || 0) + (d.reach.new_educators_cum.at(-1) || 0)).toLocaleString();
+                    result.val = (d.newsubs_latest_total ?? ((d.reach.new_learners_cum.at(-1) || 0) + (d.reach.new_educators_cum.at(-1) || 0))).toLocaleString();
                 } else if (d.fellows_reach) {
                     const f = d.fellows_reach.find(x => x.name === filterVal);
                     if (f) {
