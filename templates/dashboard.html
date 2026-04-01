@@ -1450,21 +1450,27 @@
 
             } else if (type === 'subs') {
                 if (filterVal === 'total' && d.reach?.months?.length) {
+                    const l = d.reach.total_learners;
+                    const e = d.reach.total_educators;
+                    const combined = l.map((v, i) => v + e[i]);
                     result.series = [
-                        { name: 'Total Learners', data: d.reach.total_learners },
-                        { name: 'Total Educators', data: d.reach.total_educators },
+                        { name: 'Total Subscribers', data: combined },
+                        { name: 'Trend', data: linearTrend(combined) }
                     ];
                     result.months = d.reach.months;
-                    result.val = (d.subs_latest_total ?? ((d.reach.total_learners.at(-1) || 0) + (d.reach.total_educators.at(-1) || 0))).toLocaleString();
+                    result.val = (d.subs_latest_total ?? (combined.at(-1) || 0)).toLocaleString();
                 } else if (d.fellows_reach) {
                     const f = d.fellows_reach.find(x => x.name === filterVal);
                     if (f) {
+                        const l = f.total_learners;
+                        const e = f.total_educators;
+                        const combined = l.map((v, i) => v + e[i]);
                         result.series = [
-                            { name: 'Total Learners', data: f.total_learners },
-                            { name: 'Total Educators', data: f.total_educators },
+                            { name: 'Total Subscribers', data: combined },
+                            { name: 'Trend', data: linearTrend(combined) }
                         ];
                         result.months = f.months;
-                        result.val = ((f.total_learners.at(-1) || 0) + (f.total_educators.at(-1) || 0)).toLocaleString();
+                        result.val = (combined.at(-1) || 0).toLocaleString();
                     }
                 }
 
@@ -1586,11 +1592,11 @@
                     document.querySelector('#subs-c' + cnum), {
                     chart: { type: 'line', height: 280, ...chartDefaults, animations: { enabled: false } },
                     series: ri.series,
-                    colors: ['#001c94', '#008a40'],
-                    stroke: { width: 2.5, curve: 'smooth' },
+                    colors: ['#001c94', '#94a3b8'],
+                    stroke: { width: [3, 2], curve: 'smooth', dashArray: [0, 6] },
                     xaxis: makeCategoryXAxis(ri.months),
                     yaxis: { labels: { formatter: v => v.toLocaleString(), style: { fontFamily: 'Montserrat' } } },
-                    tooltip: makeMultiSeriesTooltip(''),
+                    tooltip: makeTooltip(''),
                     legend: { position: 'top', fontSize: '11px', fontFamily: 'Montserrat' },
                     grid: { borderColor: '#f1f5f9' },
                 });
