@@ -459,9 +459,11 @@
                                         class="px-6 py-4 text-right font-mono font-semibold {% if cd.get('cohort_jobs_pct', 0) >= 0 %}text-injiniGreen{% else %}text-injiniRed{% endif %}">
                                         {{ cd.get('cohort_jobs_pct', 0) }}%</td>
                                     <td class="px-6 py-4 text-right text-injiniBlue">{{
-                                        "{:+,}".format(cd.get('jobs_table', [])|map(attribute='new_female', default=0)|sum) }}</td>
+                                        "{:+,}".format(cd.get('jobs_table', [])|map(attribute='new_female',
+                                        default=0)|sum) }}</td>
                                     <td class="px-6 py-4 text-right text-slate-800">{{
-                                        "{:+,}".format(cd.get('jobs_table', [])|map(attribute='new_youth', default=0)|sum) }}</td>
+                                        "{:+,}".format(cd.get('jobs_table', [])|map(attribute='new_youth',
+                                        default=0)|sum) }}</td>
                                 </tr>
                                 {% for j in cd.get('jobs_table', []) %}
                                 <tr class="hover:bg-slate-50/50 transition">
@@ -579,11 +581,11 @@
                                 <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Total
                                     Subscribers</h4>
                                 <h2 class="text-3xl font-bold text-slate-800" id="subs-val-c{{ cnum }}">...</h2>
-                                <p class="text-xs text-slate-400 mt-1">Learners &amp; Educators by month</p>
+                                <p class="text-xs text-slate-400 mt-1" id="subs-subtitle-c{{ cnum }}">All fellows — learners &amp; educators by month</p>
                             </div>
                             <select id="subs-filter-c{{ cnum }}" onchange="updateChart('subs', {{ cnum }}, this.value)"
                                 class="text-sm font-semibold bg-slate-50 border-0 rounded-lg text-slate-600 focus:ring-injiniBlue pb-1 pt-1 pl-3 pr-8 shadow-sm">
-                                <option value="total">Cohort Total</option>
+                                <option value="total">All Fellows</option>
                                 {% for f in cd.get('users_table', []) %}
                                 <option value="{{ f.name }}">{{ f.name }}</option>
                                 {% endfor %}
@@ -740,25 +742,28 @@
                                             Fellow Name</th>
                                         <th
                                             class="px-6 py-4 text-right font-bold text-slate-500 uppercase text-xs tracking-wider">
-                                            Female</th>
+                                            Female Learners</th>
                                         <th
                                             class="px-6 py-4 text-right font-bold text-slate-500 uppercase text-xs tracking-wider">
-                                            Rural</th>
+                                            Rural Learners</th>
                                         <th
                                             class="px-6 py-4 text-right font-bold text-slate-500 uppercase text-xs tracking-wider">
-                                            Learner with Disability</th>
+                                            Learners with Disability</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-slate-100">
                                     {% for d in cd.get('disaggregation', []) %}
                                     <tr class="hover:bg-slate-50/50 transition">
                                         <td class="px-6 py-4 font-semibold text-slate-900">{{ d.name }}</td>
-                                        <td class="px-6 py-4 text-right font-mono font-semibold text-pink-600">{{
-                                            "{:,}".format((d.female_stu if d.female_stu is defined else 0) + (d.female_tea if d.female_tea is defined else 0)) }}</td>
-                                        <td class="px-6 py-4 text-right font-mono font-semibold text-amber-600">{{
-                                            "{:,}".format((d.rural_stu if d.rural_stu is defined else 0) + (d.rural_tea if d.rural_tea is defined else 0)) }}</td>
-                                        <td class="px-6 py-4 text-right font-mono font-semibold text-violet-600">{{
-                                            "{:,}".format((d.disability_stu if d.disability_stu is defined else 0) + (d.disability_tea if d.disability_tea is defined else 0)) }}</td>
+                                        <td class="px-6 py-4 text-right font-mono font-semibold text-pink-600">
+                                            {{ d.female_stu ~ '%' if d.female_stu is not none else '-' }}
+                                        </td>
+                                        <td class="px-6 py-4 text-right font-mono font-semibold text-amber-600">
+                                            {{ d.rural_stu ~ '%' if d.rural_stu is not none else '-' }}
+                                        </td>
+                                        <td class="px-6 py-4 text-right font-mono font-semibold text-violet-600">
+                                            {{ d.disability_stu ~ '%' if d.disability_stu is not none else '-' }}
+                                        </td>
                                     </tr>
                                     {% endfor %}
                                     {% if not cd.get('disaggregation') %}
@@ -996,7 +1001,8 @@
                                     <td class="px-6 py-4 font-semibold text-slate-900">{{ c.Cohort }}</td>
                                     <td class="px-6 py-4 text-right font-mono font-semibold text-slate-800">{{
                                         "{:,}".format(c['Total Jobs']) }}</td>
-                                    <td class="px-6 py-4 text-right font-mono font-semibold text-injiniBlue">{{ c['Jobs Pct Change'] }}%</td>
+                                    <td class="px-6 py-4 text-right font-mono font-semibold text-injiniBlue">{{ c['Jobs
+                                        Pct Change'] }}%</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -1120,11 +1126,11 @@
         </div>
 
         <div class="fixed bottom-8 right-8 z-50">
-            <button id="injini-ai-btn"
-                style="background-color: #0f172a !important;"
+            <button id="injini-ai-btn" style="background-color: #0f172a !important;"
                 class="text-white p-0 rounded-full shadow-[0_12px_45px_rgba(0,0,0,0.4)] hover:scale-110 transition-transform duration-200 border-2 border-white/20 w-16 h-16 flex items-center justify-center group overflow-hidden">
                 <img src="/static/logo.svg" alt="Injini AI" class="w-10 h-10 object-contain filter brightness-0 invert">
-                <span class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-white shadow-sm"></span>
+                <span
+                    class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-white shadow-sm"></span>
             </button>
         </div>
 
@@ -1135,7 +1141,8 @@
             <div style="background: linear-gradient(to right, #001c94, #1e3a8a); color: white;"
                 class="p-4 flex justify-between items-center">
                 <div class="flex items-center gap-2">
-                    <div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center border border-white/30">
+                    <div
+                        class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center border border-white/30">
                         <img src="/static/logo.svg" class="w-5 h-5 filter brightness-0 invert">
                     </div>
                     <div>
@@ -1195,6 +1202,13 @@
         const chartDefaults = { fontFamily: 'Montserrat, sans-serif', toolbar: { show: false } };
         const renderedCharts = {};
         let currentTimeRange = '{{ current_range | default("all") }}';
+
+        const BENTO_PALETTE = [
+            '#001c94', '#008a40', '#e67e22', '#ff585f',
+            '#9b59b6', '#3899d6', '#1abc9c', '#e91e63',
+            '#795548', '#607d8b', '#f39c12', '#2ecc71'
+        ];
+
 
         // -- LINEAR TREND HELPER ----------------------------------------------
         function linearTrend(yValues) {
@@ -1297,6 +1311,30 @@
                     return '<div style="padding:8px 12px;font-family:Montserrat,sans-serif;font-size:12px;">'
                         + '<div style="color:#94a3b8;margin-bottom:4px;">' + label + '</div>'
                         + rows + '</div>';
+                }
+            };
+        }
+
+        function makeAllFellowsTooltip() {
+            return {
+                shared: true, intersect: false,
+                custom: function (opts) {
+                    var series = opts.series, dataPointIndex = opts.dataPointIndex, w = opts.w;
+                    var label = (w.globals.categoryLabels && w.globals.categoryLabels[dataPointIndex])
+                        || (w.globals.labels && w.globals.labels[dataPointIndex]) || '';
+                    var rows = '';
+                    for (var i = 0; i < series.length; i++) {
+                        var val = series[i][dataPointIndex];
+                        if (val === null || val === undefined) continue;
+                        var colour = BENTO_PALETTE[i % BENTO_PALETTE.length];
+                        rows += '<div style="display:flex;align-items:center;gap:6px;margin-top:3px;">'
+                            + '<span style="width:8px;height:8px;border-radius:50%;background:' + colour + ';flex-shrink:0;display:inline-block;"></span>'
+                            + '<span style="color:#64748b;white-space:nowrap;">' + w.globals.seriesNames[i] + ':</span>'
+                            + '<span style="font-weight:600;color:#1e293b;">' + Number(val).toLocaleString() + '</span></div>';
+                    }
+                    if (!rows) return '';
+                    return '<div style="padding:8px 12px;font-family:Montserrat,sans-serif;font-size:11px;max-width:260px;">'
+                        + '<div style="color:#94a3b8;margin-bottom:4px;">' + label + '</div>' + rows + '</div>';
                 }
             };
         }
@@ -1449,24 +1487,30 @@
                 }
 
             } else if (type === 'subs') {
-                if (filterVal === 'total' && d.reach?.months?.length) {
-                    const l = d.reach.total_learners;
-                    const e = d.reach.total_educators;
-                    const combined = l.map((v, i) => v + e[i]);
-                    result.series = [
-                        { name: 'Total Subscribers', data: combined },
-                        { name: 'Trend', data: linearTrend(combined) }
-                    ];
-                    result.months = d.reach.months;
-                    result.val = (d.subs_latest_total ?? (combined.at(-1) || 0)).toLocaleString();
+                if (filterVal === 'total') {
+                    const cohortMonths = d.reach?.months || d.cohort_aggregate?.months || [];
+                    if (cohortMonths.length && d.fellows_reach?.length) {
+                        result.months = cohortMonths;
+                        result.series = d.fellows_reach.map(f => {
+                            const monthMap = {};
+                            f.months.forEach((m, i) => {
+                                monthMap[m] = (f.total_learners[i] || 0) + (f.total_educators[i] || 0);
+                            });
+                            const data = cohortMonths.map(m => monthMap[m] !== undefined ? monthMap[m] : null);
+                            return { name: f.name, data };
+                        });
+                        const lastL = d.reach?.total_learners?.at(-1) || 0;
+                        const lastE = d.reach?.total_educators?.at(-1) || 0;
+                        result.val = (lastL + lastE).toLocaleString();
+                    }
                 } else if (d.fellows_reach) {
                     const f = d.fellows_reach.find(x => x.name === filterVal);
                     if (f) {
                         const l = f.total_learners;
                         const e = f.total_educators;
-                        const combined = l.map((v, i) => v + e[i]);
+                        const combined = l.map((v, i) => v + (e[i] || 0));
                         result.series = [
-                            { name: 'Total Subscribers', data: combined },
+                            { name: f.name, data: combined },
                             { name: 'Trend', data: linearTrend(combined) }
                         ];
                         result.months = f.months;
@@ -1522,6 +1566,42 @@
             return { ..._sliceData(result.series, result.months), val: result.val };
         }
 
+        function makeSubsChartOptions(seriesArr, months, isMulti) {
+            const base = {
+                chart:  { type: 'line', height: 280, ...chartDefaults, animations: { enabled: false } },
+                series: seriesArr,
+                xaxis:  makeCategoryXAxis(months),
+                yaxis:  { labels: { formatter: v => v.toLocaleString(), style: { fontFamily: 'Montserrat' } } },
+                grid:   { borderColor: '#f1f5f9' },
+            };
+
+            if (isMulti) {
+                return {
+                    ...base,
+                    colors:  BENTO_PALETTE.slice(0, seriesArr.length),
+                    stroke:  { width: 2, curve: 'smooth' },
+                    markers: { size: 0 },
+                    legend:  {
+                        position: 'top', fontSize: '9px', fontFamily: 'Montserrat',
+                        itemMargin: { horizontal: 4, vertical: 2 },
+                        markers:   { width: 8, height: 8, radius: 8 }
+                    },
+                    tooltip: makeAllFellowsTooltip(),
+                    dataLabels: { enabled: false },
+                };
+            }
+
+            return {
+                ...base,
+                colors:  ['#001c94', '#94a3b8'],
+                stroke:  { width: [3, 2], curve: 'smooth', dashArray: [0, 6] },
+                markers: { size: 0 },
+                legend:  { position: 'top', fontSize: '11px', fontFamily: 'Montserrat' },
+                tooltip: makeTooltip(''),
+                dataLabels: { enabled: false },
+            };
+        }
+
         // -- COHORT CHART INITIALIZATION --------------------------------------
         function initCohortCharts(cohortKey, cnum) {
             if (renderedCharts[cohortKey]) return;
@@ -1541,6 +1621,7 @@
                 tooltip: makeTooltip('R '),
                 legend: { position: 'top', fontSize: '11px', fontFamily: 'Montserrat' },
                 grid: { borderColor: '#f1f5f9' },
+                dataLabels: { enabled: false },
                 // FIX 5: Show month count annotation
                 annotations: {}
             });
@@ -1589,17 +1670,9 @@
             if (ri.series.length) {
                 updateMetricDOM('subs-val-c' + cnum, ri.val);
                 renderedCharts[cohortKey + '-subs'] = new ApexCharts(
-                    document.querySelector('#subs-c' + cnum), {
-                    chart: { type: 'line', height: 280, ...chartDefaults, animations: { enabled: false } },
-                    series: ri.series,
-                    colors: ['#001c94', '#94a3b8'],
-                    stroke: { width: [3, 2], curve: 'smooth', dashArray: [0, 6] },
-                    xaxis: makeCategoryXAxis(ri.months),
-                    yaxis: { labels: { formatter: v => v.toLocaleString(), style: { fontFamily: 'Montserrat' } } },
-                    tooltip: makeTooltip(''),
-                    legend: { position: 'top', fontSize: '11px', fontFamily: 'Montserrat' },
-                    grid: { borderColor: '#f1f5f9' },
-                });
+                    document.querySelector('#subs-c' + cnum), 
+                    makeSubsChartOptions(ri.series, ri.months, true)
+                );
                 renderedCharts[cohortKey + '-subs'].render();
 
                 // New Subscribers
@@ -1617,6 +1690,7 @@
                     tooltip: makeMultiSeriesTooltip(''),
                     legend: { position: 'top', fontSize: '11px', fontFamily: 'Montserrat' },
                     grid: { borderColor: '#f1f5f9' },
+                    dataLabels: { enabled: false },
                 });
                 renderedCharts[cohortKey + '-newsubs'].render();
 
@@ -1634,6 +1708,7 @@
                     yaxis: { labels: { formatter: v => v.toLocaleString(), style: { fontFamily: 'Montserrat' } } },
                     legend: { position: 'top', fontSize: '11px', fontFamily: 'Montserrat' },
                     grid: { borderColor: '#f1f5f9' },
+                    dataLabels: { enabled: false },
                 });
                 renderedCharts[cohortKey + '-schools'].render();
             }
@@ -1658,10 +1733,23 @@
             if (!renderedCharts[chartKey] || !updated.series.length) return;
 
             // FIX 5: Always update both xaxis categories AND series data together
-            renderedCharts[chartKey].updateOptions({
-                xaxis: makeCategoryXAxis(updated.months),
-                series: updated.series,
-            }, false, false);
+            if (type === 'subs') {
+                const isMulti = (filterVal === 'total');
+                const newOpts = makeSubsChartOptions(updated.series, updated.months, isMulti);
+                renderedCharts[chartKey].updateOptions(newOpts, false, false);
+
+                const subEl = document.getElementById('subs-subtitle-c' + cnum);
+                if (subEl) {
+                    subEl.innerText = isMulti 
+                        ? "All fellows — learners & educators by month" 
+                        : "Learners & educators by month";
+                }
+            } else {
+                renderedCharts[chartKey].updateOptions({
+                    xaxis: makeCategoryXAxis(updated.months),
+                    series: updated.series,
+                }, false, false);
+            }
         }
 
         // -- OVERALL CHARTS ---------------------------------------------------
@@ -1809,7 +1897,7 @@
                     },
                     // Label at the last data point of each series
                     dataLabels: {
-                        enabled: true,
+                        enabled: false,
                         enabledOnSeries: seriesArr.map((_, i) => i),
                         formatter: function (val, opts) {
                             // Only show label on the last point
@@ -1869,7 +1957,7 @@
                 colors: ['#001c94', '#008a40', '#3899d6'],
                 markers: { size: 5, strokeWidth: 2, strokeColors: '#fff', hover: { size: 8 } },
                 dataLabels: {
-                    enabled: true,
+                    enabled: false,
                     formatter: function (val, opts) {
                         const pts = opts.w.globals.series[opts.seriesIndex];
                         if (opts.dataPointIndex !== pts.length - 1) return '';
