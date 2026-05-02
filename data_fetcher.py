@@ -291,15 +291,17 @@ def fetch_dashboard_data() -> pd.DataFrame:
                 ]) or ((q13_schools or 0) + (sa_schools or 0))
 
                 # ── Investments ──────────────────────────────────────────────
-                # C1: NOT IN SCHEMA (returns 0) | C2/C3: 'Rand value of grant/investment'
-                # NOTE: 'New grants and investments' exists in C2/C3 but is always 0 — use Rand value field
+                # C1: 'Rand value of this new grant/ investment secured. '
+                # C2/C3: 'Rand value of grant/investment'
                 grants_value = _get(lk, [
-                    "Rand value of grant/investment",   # C2/C3 — confirmed non-zero
-                    "New grants and investments",       # fallback
+                    "Rand value of grant/investment",
+                    "Rand value of this new grant/ investment secured.", # C1
+                    "New grants and investments",
                 ]) or 0
-                # C2/C3 only
+                # C1: 'grant/ investment details' | C2/C3: 'If yes, please specify...'
                 grant_funder = _get(lk, [
                     "If yes, please specify from whom this grant/ investment was made.",
+                    "grant/ investment details", # C1
                 ]) or ""
                 income_statement = _get(lk, [
                     "Income statement  ",   # C1 — trailing double space
