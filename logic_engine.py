@@ -689,12 +689,12 @@ def calculate_kpis(df: pd.DataFrame, time_range: str = "all") -> dict:
             })
 
             # ── Disaggregation ────────────────────────────────────────────────
-            biz_female_stu = _safe_float(bs_valid["Female Students"].dropna().iloc[-1])      if not bs_valid["Female Students"].dropna().empty      else None
-            biz_female_tea = _safe_float(bs_valid["Female Teachers"].dropna().iloc[-1])      if not bs_valid["Female Teachers"].dropna().empty      else None
-            biz_rural_stu  = _safe_float(bs_valid["Rural Students"].dropna().iloc[-1])       if not bs_valid["Rural Students"].dropna().empty       else None
-            biz_rural_tea  = _safe_float(bs_valid["Rural Teachers"].dropna().iloc[-1])       if not bs_valid["Rural Teachers"].dropna().empty       else None
-            biz_disab_stu  = _safe_float(bs_valid["Disability Students"].dropna().iloc[-1])  if not bs_valid["Disability Students"].dropna().empty  else None
-            biz_disab_tea  = _safe_float(bs_valid["Disability Teachers"].dropna().iloc[-1])  if not bs_valid["Disability Teachers"].dropna().empty  else None
+            biz_female_stu = _latest_nv("Female Students", None)
+            biz_female_tea = _latest_nv("Female Teachers", None)
+            biz_rural_stu  = _latest_nv("Rural Students",  None)
+            biz_rural_tea  = _latest_nv("Rural Teachers",  None)
+            biz_disab_stu  = _latest_nv("Disability Students", None)
+            biz_disab_tea  = _latest_nv("Disability Teachers", None)
 
             disagg_table.append({
                 "name":           biz_name,
