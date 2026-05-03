@@ -28,6 +28,9 @@
 
       .cls-6 {
         fill: #fff;
+        stroke: #fff;
+        stroke-width: 8px;
+        stroke-linejoin: round;
       }
 
       .cls-7 {
