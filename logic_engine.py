@@ -60,6 +60,66 @@ def _normalize_name(name: str) -> str:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+#  Dynamic Data Corrections
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _apply_cohort1_corrections(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Dynamically loads Cohort 1 corrections and calculates missing teacher values.
+    Teachers = Corrected Total Reach - Students.
+    """
+    try:
+        import os
+        file_path = os.path.join(os.path.dirname(__file__), "Cohort1_Reach_Corrected_Complete.xlsx")
+        if not os.path.exists(file_path):
+            return df
+            
+        corr_df = pd.read_excel(file_path, skiprows=4)
+        months_raw = corr_df.columns[2:].tolist()
+        
+        def clean_month(m):
+            import re
+            match = re.search(r'^([A-Za-z]+)\s+(\d{4})', m)
+            if match:
+                dt = pd.to_datetime(match.group(1) + " " + match.group(2))
+                return dt.strftime('%Y-%m')
+            return m
+            
+        months_clean = [clean_month(m) for m in months_raw]
+        
+        data = {}
+        for index, row in corr_df.iterrows():
+            name = row.iloc[0]
+            if pd.isna(name) or str(name).startswith("Total") or str(name).startswith("LEGEND") or str(name).startswith(" " * 5):
+                continue
+            name = _normalize_name(str(name))
+            for i, month_key in enumerate(months_clean):
+                val = row.iloc[2 + i]
+                if pd.notna(val):
+                    if name not in data:
+                        data[name] = {}
+                    data[name][month_key] = float(val)
+        
+        for idx, row in df.iterrows():
+            if row.get("Cohort") == "Cohort 1" and pd.notna(row.get("Date")):
+                b_name = row.get("Business Name")
+                m_key = row["Date"].strftime("%Y-%m")
+                if b_name in data and m_key in data[b_name]:
+                    total_corrected = data[b_name][m_key]
+                    students = row.get("Total Subscribers Students", 0)
+                    if pd.isna(students): students = 0
+                    
+                    teachers = max(0, total_corrected - students)
+                    
+                    df.at[idx, "Total Subscribers Students"] = students
+                    df.at[idx, "Total Subscribers Teachers"] = teachers
+    except Exception as e:
+        print(f"Failed to apply Cohort 1 corrections: {e}")
+        
+    return df
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 #  Date Parsing
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -346,9 +406,13 @@ def calculate_kpis(df: pd.DataFrame, time_range: str = "all") -> dict:
         & (df["Business Name"].str.lower() != "unknown")
     ].copy()
 
-    # ── FIX 1: resolve duplicate (Business Name, Date) entries via MAX ────────
-    duplicate_warnings: list = []
+    # FIX 1: resolve duplicate (Business Name, Date) entries via MAX
+    duplicate_warnings: list     = []
+    data_quality_warnings: list  = []   # FIX 3: teacher-spike flags
     df = _dedup_business_records(df, duplicate_warnings)
+
+    # ── FIX 10: Dynamic Cohort 1 Reach Calculation ────────────────────────────
+    df = _apply_cohort1_corrections(df)
 
     # ── Optional time-range filter ────────────────────────────────────────────
     global_s_date = global_e_date = None
