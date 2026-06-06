@@ -12,7 +12,8 @@ import io
 import csv
 import json
 import time
-from flask import Flask, render_template, Response, request, jsonify
+from flask import Flask, render_template, Response, request, jsonify, session, redirect, url_for, flash
+from functools import wraps
 from dotenv import load_dotenv
 from groq import Groq
 
@@ -22,7 +23,24 @@ from logic_engine import calculate_kpis
 load_dotenv(override=True)
 
 app = Flask(__name__)
+app.secret_key = os.getenv('SECRET_KEY', 'injini-dashboard-secret-2026')
 groq_client = Groq(api_key=os.getenv('GROQ_API_KEY'))
+
+# ---------------------------------------------------------------------------
+# Authentication Setup
+# ---------------------------------------------------------------------------
+ADMIN_CREDENTIALS = {
+    'injini1': 'injiniafrica@123',
+    'injini2': 'injiniafrica@456'
+}
+
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get('authenticated'):
+            return redirect(url_for('login', next=request.url))
+        return f(*args, **kwargs)
+    return decorated_function
 
 
 # ---------------------------------------------------------------------------
@@ -86,7 +104,30 @@ def health():
     return 'ok', 200
 
 
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        
+        if username in ADMIN_CREDENTIALS and ADMIN_CREDENTIALS[username] == password:
+            session['authenticated'] = True
+            session['username'] = username
+            next_page = request.args.get('next')
+            return redirect(next_page or url_for('dashboard'))
+        else:
+            flash('Invalid username or password', 'error')
+            
+    return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('login'))
+
+
 @app.route('/')
+@login_required
 def dashboard():
     time_range = request.args.get('range', 'all')
     raw_df, kpi_data = get_dashboard_data(time_range)
@@ -116,6 +157,7 @@ def dashboard():
 
 
 @app.route('/api/chat', methods=['POST'])
+@login_required
 def chat_with_data():
     try:
         data = request.json
@@ -174,6 +216,7 @@ def chat_with_data():
 
 
 @app.route('/export')
+@login_required
 def export_csv():
     raw_df, kpi_data = get_dashboard_data()
     output = io.StringIO()

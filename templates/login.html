@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Injini | Dashboard Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com?v=3"></script>
+    <script>
+        window.tailwind = {
+            config: {
+                theme: {
+                    extend: {
+                        fontFamily: { sans: ['Montserrat', 'sans-serif'] },
+                        colors: {
+                            injiniBlue: '#001c94',
+                            injiniGold: '#ffd100',
+                            injiniGreen: '#008a40',
+                            injiniRed: '#ff585f',
+                            injiniCyan: '#3899d6'
+                        }
+                    }
+                }
+            }
+        };
+    </script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            background-color: #f8fafc;
+            background-image: radial-gradient(circle at 100% 100%, #3899d61a 0, transparent 50%), 
+                              radial-gradient(circle at 0 0, #001c941a 0, transparent 50%);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-slide-up {
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-md animate-slide-up">
+        
+        <!-- Logo Header -->
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center w-20 h-20 bg-white rounded-2xl shadow-sm mb-4">
+                <img src="/static/primary_logo.svg" alt="Injini Logo" class="h-10" onerror="this.src='https://via.placeholder.com/150x50?text=INJINI'">
+            </div>
+            <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Welcome Back</h1>
+            <p class="text-sm text-gray-500 mt-2">Sign in to access the MEL Dashboard</p>
+        </div>
+
+        <!-- Login Card -->
+        <div class="glass-card rounded-2xl p-8">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="mb-6 p-4 rounded-xl bg-red-50 border border-red-100 flex items-start">
+                            <i data-lucide="alert-circle" class="w-5 h-5 text-red-500 mr-3 shrink-0 mt-0.5"></i>
+                            <p class="text-sm font-medium text-red-800">{{ message }}</p>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <form action="{{ url_for('login') }}" method="POST" class="space-y-6">
+                <!-- Username -->
+                <div>
+                    <label for="username" class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Username</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i data-lucide="user" class="w-5 h-5 text-gray-400"></i>
+                        </div>
+                        <input type="text" name="username" id="username" required
+                            class="block w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 text-sm focus:ring-2 focus:ring-injiniBlue focus:border-injiniBlue transition-colors outline-none"
+                            placeholder="Enter your username">
+                    </div>
+                </div>
+
+                <!-- Password -->
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <label for="password" class="block text-xs font-bold text-gray-500 uppercase tracking-wider">Password</label>
+                    </div>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i data-lucide="lock" class="w-5 h-5 text-gray-400"></i>
+                        </div>
+                        <input type="password" name="password" id="password" required
+                            class="block w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 text-sm focus:ring-2 focus:ring-injiniBlue focus:border-injiniBlue transition-colors outline-none"
+                            placeholder="Enter your password">
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit"
+                    class="w-full flex items-center justify-center py-3.5 px-4 border border-transparent rounded-xl shadow-sm text-sm font-bold text-white bg-injiniBlue hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-injiniBlue transition-all duration-200 transform hover:-translate-y-0.5">
+                    Sign In
+                    <i data-lucide="arrow-right" class="w-4 h-4 ml-2"></i>
+                </button>
+            </form>
+        </div>
+        
+        <!-- Footer -->
+        <p class="text-center text-xs text-gray-400 mt-8 font-medium">
+            &copy; 2026 Injini Africa. All rights reserved.
+        </p>
+    </div>
+
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>
